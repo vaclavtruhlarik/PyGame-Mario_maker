@@ -4,6 +4,8 @@ from pygame.mouse import get_pressed as mouse_buttons
 from pygame.mouse import get_pos as mouse_pos
 from settings import *
 
+from menu import Menu
+
 class Editor:
 	def __init__(self):
 
@@ -19,6 +21,12 @@ class Editor:
 		self.support_line_surf = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
 		self.support_line_surf.set_colorkey("green")
 		self.support_line_surf.set_alpha(30)
+
+		# selection
+		self.selection_index = 2
+
+		# menu
+		self.menu = Menu()
 		
 	# input
 	def event_loop(self):
@@ -27,6 +35,8 @@ class Editor:
 				pygame.quit()
 				sys.exit()
 			self.pan_input(event)
+			self.selection_hotkeys(event)
+			self.menu_click(event)
 
 	def pan_input(self, event):
 		# middle mouse button pressed / released
@@ -46,6 +56,20 @@ class Editor:
 		# panning update
 		if self.pan_active:
 			self.origin = vector(mouse_pos()) - self.pan_offset
+
+	def selection_hotkeys(self, event):
+		if event.type == pygame.KEYDOWN:
+			if event.key == pygame.K_RIGHT:
+				self.selection_index += 1
+			if event.key == pygame.K_LEFT:
+				self.selection_index -= 1
+		self.selection_index = min(max(self.selection_index, 2), 18)
+	
+	def menu_click(self, event):
+		if event.type == pygame.MOUSEBUTTONDOWN and self.menu.rect.collidepoint(mouse_pos()):
+			ret = self.menu.click(mouse_pos(), mouse_buttons())
+			if ret:
+				self.selection_index = ret
 
 	# drawing
 	def draw_tile_lines(self):
@@ -69,9 +93,10 @@ class Editor:
 		self.display_surface.blit(self.support_line_surf, (0,0))
 	
 	def run(self, dt):
-		self.display_surface.fill('white')
 		self.event_loop()
 
 		# drawing
+		self.display_surface.fill('gray')
 		self.draw_tile_lines()
 		pygame.draw.circle(self.display_surface, 'red', self.origin, 10)
+		self.menu.display(self.selection_index)
