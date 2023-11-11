@@ -11,7 +11,7 @@ class Editor:
 
 		# main setup 
 		self.display_surface = pygame.display.get_surface()
-		self.canvas_data = {}
+		self.canvas_data: dict[tuple, CanvasTile] = {}
 		self.last_selected_cell = None
 
 		# navigation
@@ -101,8 +101,8 @@ class Editor:
 					self.canvas_data[current_cell] = CanvasTile(self.selection_index)
 				self.last_selected_cell = current_cell
 		
-		for key, value in self.canvas_data.items():
-			print(f"{key}: {value.has_terrain}")
+		# for key, value in self.canvas_data.items():
+		# 	print(f"{key}: {value.has_terrain}")
 	
 	# drawing
 	def draw_tile_lines(self):
@@ -125,11 +125,40 @@ class Editor:
 
 		self.display_surface.blit(self.support_line_surf, (0,0))
 	
+	def draw_level(self):
+		for cell_pos, tile in self.canvas_data.items():
+			pos = self.origin + vector(cell_pos) * TILE_SIZE
+
+			# water
+			if tile.has_water:
+				test_surf = pygame.Surface((TILE_SIZE, TILE_SIZE))
+				test_surf.fill('blue')
+				self.display_surface.blit(test_surf, pos)
+
+			# terrain
+			if tile.has_terrain:
+				test_surf = pygame.Surface((TILE_SIZE, TILE_SIZE))
+				test_surf.fill('maroon')
+				self.display_surface.blit(test_surf, pos)
+
+			# coin
+			if tile.coin:
+				test_surf = pygame.Surface((TILE_SIZE, TILE_SIZE))
+				test_surf.fill('yellow')
+				self.display_surface.blit(test_surf, pos)
+
+			# enemy
+			if tile.enemy:
+				test_surf = pygame.Surface((TILE_SIZE, TILE_SIZE))
+				test_surf.fill('red')
+				self.display_surface.blit(test_surf, pos)
+	
 	def run(self, dt):
 		self.event_loop()
 
 		# drawing
 		self.display_surface.fill('gray')
+		self.draw_level()
 		self.draw_tile_lines()
 		pygame.draw.circle(self.display_surface, 'red', self.origin, 10)
 		self.menu.display(self.selection_index)
