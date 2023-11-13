@@ -13,7 +13,7 @@ class Main:
 		self.clock = pygame.time.Clock()
 		self.imports()
 
-		self.editor = Editor()
+		self.editor = Editor(self.land_tiles)
 
 		# cursor
 		surf = load('../graphics/cursors/mouse.png').convert_alpha()
@@ -22,7 +22,6 @@ class Main:
 
 	def imports(self):
 		self.land_tiles = import_folder_dict('../graphics/terrain/land')
-		print(self.land_tiles)
 	
 	def run(self):
 		while True:
